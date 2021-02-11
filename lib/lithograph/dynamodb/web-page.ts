@@ -7,6 +7,23 @@ export class DynamoDBWebPage {
 
   constructor(scope: cdk.Stack) {
     this.table = new Table(scope, "WebPageTable");
+    this.addCrossSearchGSI();
+  }
+
+  private addCrossSearchGSI() {
+    this.table.addGlobalSecondaryIndex({
+      indexName: "CrossSearchGSI",
+      partitionKey: {
+        name: "crossSearch",
+        type: dynamodb.AttributeType.STRING,
+      },
+      sortKey: {
+        name: "publisedSort",
+        type: dynamodb.AttributeType.STRING,
+      },
+      nonKeyAttributes: ["id", "title"],
+      projectionType: dynamodb.ProjectionType.INCLUDE,
+    });
   }
 
   grantReadData(grantee: iam.IGrantable) {
