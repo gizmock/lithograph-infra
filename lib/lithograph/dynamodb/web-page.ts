@@ -6,15 +6,19 @@ export class DynamoDBWebPage {
   private readonly table: dynamodb.Table;
 
   constructor(scope: cdk.Stack) {
-    this.table = new WebPageTable(scope, "WebPageTable");
+    this.table = new Table(scope, "WebPageTable");
   }
 
   grantReadData(grantee: iam.IGrantable) {
     this.table.grantReadData(grantee);
   }
+
+  grantReadWriteData(grantee: iam.IGrantable) {
+    this.table.grantReadWriteData(grantee);
+  }
 }
 
-class WebPageTable extends dynamodb.Table {
+class Table extends dynamodb.Table {
   constructor(scope: cdk.Construct, id: string) {
     super(scope, id, {
       partitionKey: {

@@ -39,6 +39,6 @@ export class Lithograph {
     });
     const adminRole = adminStacks.adminAuthenticatedRole();
     webStacks.addBucketAccessToRole(adminRole);
-    dynamodbWebPage.grantReadData(adminRole);
+    dynamodbWebPage.grantReadWriteData(adminRole);
   }
 }
