@@ -18,7 +18,7 @@ export class DynamoDBWebPage {
         type: dynamodb.AttributeType.STRING,
       },
       sortKey: {
-        name: "publisedSort",
+        name: "publishedSort",
         type: dynamodb.AttributeType.STRING,
       },
       nonKeyAttributes: ["id", "title", "published"],
