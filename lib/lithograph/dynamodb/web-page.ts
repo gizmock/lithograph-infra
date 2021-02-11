@@ -21,7 +21,7 @@ export class DynamoDBWebPage {
         name: "publisedSort",
         type: dynamodb.AttributeType.STRING,
       },
-      nonKeyAttributes: ["id", "title"],
+      nonKeyAttributes: ["id", "title", "published"],
       projectionType: dynamodb.ProjectionType.INCLUDE,
     });
   }
