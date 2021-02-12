@@ -31,7 +31,7 @@ export class Lithograph {
       hostedZone: siteHostedZone.hostedZone,
     });
 
-    // database
+    // DynamoDB
     const dynamodbWebPage = new DynamoDBWebPage(scope);
 
     // admin

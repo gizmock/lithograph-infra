@@ -8,13 +8,9 @@ const COGNITO_STATUS_AUTHENTICATED = "authenticated";
 
 export class AdminCognito {
   private readonly userPool: cognito.UserPool;
-
   private readonly userPoolClient: cognito.UserPoolClient;
-
   private readonly identityPool: cognito.CfnIdentityPool;
-
   private readonly unauthenticatedRole: iam.Role;
-
   private readonly authenticatedRole: iam.Role;
 
   constructor(scope: cdk.Construct) {
