@@ -6,7 +6,61 @@ const COGNITO_IDENTITY_DOMAIN = "cognito-identity.amazonaws.com";
 const COGNITO_STATUS_UNAUTHENTICATED = "unauthenticated";
 const COGNITO_STATUS_AUTHENTICATED = "authenticated";
 
-export class AdminUserPool extends cognito.UserPool {
+export class AdminCognito {
+  private readonly userPool: cognito.UserPool;
+
+  private readonly userPoolClient: cognito.UserPoolClient;
+
+  private readonly identityPool: cognito.CfnIdentityPool;
+
+  private readonly unauthenticatedRole: iam.Role;
+
+  private readonly authenticatedRole: iam.Role;
+
+  constructor(scope: cdk.Construct) {
+    this.userPool = new AdminUserPool(scope, "AdminCognitoUserPool");
+    this.userPoolClient = new AdminUserPoolClient(
+      scope,
+      "AdminCognitoUserPoolClient",
+      this.userPool
+    );
+
+    this.identityPool = new AdminIdentityPool(
+      scope,
+      "AdminCognitoIdentityPool",
+      this.userPool,
+      this.userPoolClient
+    );
+
+    this.unauthenticatedRole = new AdminUnauthenticatedRole(
+      scope,
+      "AdminCognitoIdentityUnauthenticatedRole",
+      this.identityPool
+    );
+
+    this.authenticatedRole = new AdminAuthenticatedRole(
+      scope,
+      "AdminCognitoIdentityAuthenticatedRole",
+      this.identityPool
+    );
+
+    new AdminIdentityRoleAttachement(
+      scope,
+      "AdminCognitoIdentityRoleAttachment",
+      {
+        identityPool: this.identityPool,
+        unauthenticatedRole: this.unauthenticatedRole,
+        authenticatedRole: this.authenticatedRole,
+      }
+    );
+  }
+
+  getAuthenticatedGrantee(): iam.IGrantable {
+    return this.authenticatedRole;
+  }
+}
+
+class AdminUserPool extends cognito.UserPool {
   constructor(scope: cdk.Construct, id: string) {
     super(scope, id, {
       selfSignUpEnabled: false,
@@ -14,54 +68,46 @@ export class AdminUserPool extends cognito.UserPool {
   }
 }
 
-type AdminUserPoolClientProps = {
-  readonly userPool: cognito.UserPool;
-};
-
-export class AdminUserPoolClient extends cognito.UserPoolClient {
-  constructor(
-    scope: cdk.Construct,
-    id: string,
-    props: AdminUserPoolClientProps
-  ) {
+class AdminUserPoolClient extends cognito.UserPoolClient {
+  constructor(scope: cdk.Construct, id: string, userPool: cognito.IUserPool) {
     super(scope, id, {
-      userPool: props.userPool,
+      userPool: userPool,
       preventUserExistenceErrors: true,
     });
   }
 }
 
-type AdminIdentityPoolProps = {
-  readonly userPool: cognito.UserPool;
-  readonly userPoolClient: cognito.UserPoolClient;
-};
-
-export class AdminIdentityPool extends cognito.CfnIdentityPool {
-  constructor(scope: cdk.Construct, id: string, props: AdminIdentityPoolProps) {
+class AdminIdentityPool extends cognito.CfnIdentityPool {
+  constructor(
+    scope: cdk.Construct,
+    id: string,
+    userPool: cognito.UserPool,
+    userPoolClient: cognito.UserPoolClient
+  ) {
     super(scope, id, {
       allowUnauthenticatedIdentities: false,
       cognitoIdentityProviders: [
         {
-          clientId: props.userPoolClient.userPoolClientId,
-          providerName: props.userPool.userPoolProviderName,
+          clientId: userPoolClient.userPoolClientId,
+          providerName: userPool.userPoolProviderName,
         },
       ],
     });
   }
 }
 
-type IdentityRoleProps = {
-  readonly identityPool: cognito.CfnIdentityPool;
-};
-
-export class AdminUnauthenticatedRole extends iam.Role {
-  constructor(scope: cdk.Construct, id: string, props: IdentityRoleProps) {
+class AdminUnauthenticatedRole extends iam.Role {
+  constructor(
+    scope: cdk.Construct,
+    id: string,
+    identityPool: cognito.CfnIdentityPool
+  ) {
     super(scope, id, {
       assumedBy: new iam.FederatedPrincipal(
         COGNITO_IDENTITY_DOMAIN,
         {
           StringEquals: {
-            "cognito-identity.amazonaws.com:aud": props.identityPool.ref,
+            "cognito-identity.amazonaws.com:aud": identityPool.ref,
           },
           "ForAnyValue:StringLike": {
             "cognito-identity.amazonaws.com:amr": COGNITO_STATUS_UNAUTHENTICATED,
@@ -80,14 +126,18 @@ export class AdminUnauthenticatedRole extends iam.Role {
   }
 }
 
-export class AdminAuthenticatedRole extends iam.Role {
-  constructor(scope: cdk.Construct, id: string, props: IdentityRoleProps) {
+class AdminAuthenticatedRole extends iam.Role {
+  constructor(
+    scope: cdk.Construct,
+    id: string,
+    identityPool: cognito.CfnIdentityPool
+  ) {
     super(scope, id, {
       assumedBy: new iam.FederatedPrincipal(
         COGNITO_IDENTITY_DOMAIN,
         {
           StringEquals: {
-            "cognito-identity.amazonaws.com:aud": props.identityPool.ref,
+            "cognito-identity.amazonaws.com:aud": identityPool.ref,
           },
           "ForAnyValue:StringLike": {
             "cognito-identity.amazonaws.com:amr": COGNITO_STATUS_AUTHENTICATED,
@@ -96,6 +146,7 @@ export class AdminAuthenticatedRole extends iam.Role {
         "sts:AssumeRoleWithWebIdentity"
       ),
     });
+
     this.addToPolicy(
       new iam.PolicyStatement({
         effect: iam.Effect.ALLOW,
@@ -110,17 +161,15 @@ export class AdminAuthenticatedRole extends iam.Role {
   }
 }
 
-type IdentityRoleAttachementProps = {
-  readonly identityPool: cognito.CfnIdentityPool;
-  readonly unauthenticatedRole: iam.Role;
-  readonly authenticatedRole: iam.Role;
-};
-
-export class AdminIdentityRoleAttachement extends cognito.CfnIdentityPoolRoleAttachment {
+class AdminIdentityRoleAttachement extends cognito.CfnIdentityPoolRoleAttachment {
   constructor(
     scope: cdk.Construct,
     id: string,
-    props: IdentityRoleAttachementProps
+    props: {
+      identityPool: cognito.CfnIdentityPool;
+      unauthenticatedRole: iam.Role;
+      authenticatedRole: iam.Role;
+    }
   ) {
     super(scope, id, {
       identityPoolId: props.identityPool.ref,

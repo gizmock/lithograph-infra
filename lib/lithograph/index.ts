@@ -16,8 +16,8 @@ type Props = {
 
 export class Lithograph {
   constructor(scope: cdk.Stack, props: Props) {
+    // network
     const adminDomain = props.adminSubDomainName + "." + props.domain;
-
     const siteHostedZone = new SiteHostedZone(scope, props.domain);
     const siteCertificate = new SiteCertificate({
       scope: scope,
@@ -25,21 +25,26 @@ export class Lithograph {
       adminDomain: adminDomain,
       zone: siteHostedZone.hostedZone,
     });
-
     const networkStacks = new network.NetworkStacks({
       webDomain: props.domain,
       adminDomain: adminDomain,
       hostedZone: siteHostedZone.hostedZone,
     });
-    const adminStacks = new admin.AdminStacks(scope, {
+
+    // database
+    const dynamodbWebPage = new DynamoDBWebPage(scope);
+
+    // admin
+    const adminResource = new admin.AdminResource(scope, {
       domain: adminDomain,
       certificate: siteCertificate.adminCertificate,
       appSourceDirectory: props.adminAppSourceDirectory,
     });
+    const adminGrantee = adminResource.getAuthenticatedGrantee();
+    dynamodbWebPage.grantReadWriteData(adminGrantee);
 
-    const dynamodbWebPage = new DynamoDBWebPage(scope);
-
-    const webStacks = new web.ServiceStack(scope, {
+    // service
+    const serviceResource = new web.ServiceResource(scope, {
       domain: props.domain,
       certificate: siteCertificate.webCertificate,
       renderAssetDirectory: props.webRenderAssetDirectory,
@@ -47,11 +52,9 @@ export class Lithograph {
       dynamodbWebPage: dynamodbWebPage,
     });
     networkStacks.createDNSRecords(scope, {
-      adminDistribution: adminStacks.distribution,
-      webDistrribution: webStacks.distribution,
+      adminDistribution: adminResource.distribution,
+      webDistrribution: serviceResource.distribution,
     });
-    const adminRole = adminStacks.adminAuthenticatedRole();
-    webStacks.addBucketAccessToRole(adminRole);
-    dynamodbWebPage.grantReadWriteData(adminRole);
+    serviceResource.addBucketAccessToRole(adminGrantee);
   }
 }

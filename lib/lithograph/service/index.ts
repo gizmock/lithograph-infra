@@ -19,7 +19,7 @@ type Props = {
   readonly dynamodbWebPage: DynamoDBWebPage;
 };
 
-export class ServiceStack {
+export class ServiceResource {
   readonly bucket: s3.Bucket;
   readonly renderFunction: lambda.Function;
   readonly renderAPI: apigatewayv2.HttpApi;
