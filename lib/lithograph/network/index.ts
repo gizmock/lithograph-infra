@@ -4,21 +4,20 @@ import * as cdk from "@aws-cdk/core";
 import {
   CloudFrontDistributionIPV4ARecord,
   CloudFrontDistributionIPV6AaaaRecord,
-  SiteHostedZone,
 } from "./route53";
 
-type NetworkStacksProps = {
+type Props = {
   webDomain: string;
   adminDomain: string;
-  hostedZone: SiteHostedZone;
+  hostedZone: route53.IHostedZone;
 };
 
 export class NetworkStacks {
   private readonly webDomain: string;
   private readonly adminDomain: string;
-  private readonly hostedZone: route53.PublicHostedZone;
+  private readonly hostedZone: route53.IHostedZone;
 
-  constructor(props: NetworkStacksProps) {
+  constructor(props: Props) {
     this.webDomain = props.webDomain;
     this.adminDomain = props.adminDomain;
     this.hostedZone = props.hostedZone;

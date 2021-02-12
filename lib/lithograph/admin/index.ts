@@ -18,7 +18,7 @@ import {
 
 type AdminStacksProps = {
   readonly domain: string;
-  readonly certificate: certificatemanager.DnsValidatedCertificate;
+  readonly certificate: certificatemanager.ICertificate;
   readonly appSourceDirectory: string;
 };
 

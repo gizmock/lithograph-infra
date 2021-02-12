@@ -3,21 +3,9 @@ import * as route53 from "@aws-cdk/aws-route53";
 import * as targets from "@aws-cdk/aws-route53-targets";
 import * as cloudfront from "@aws-cdk/aws-cloudfront";
 
-type SiteHostedZoneProps = {
-  readonly domain: string;
-};
-
-export class SiteHostedZone extends route53.PublicHostedZone {
-  constructor(scope: cdk.Construct, id: string, props: SiteHostedZoneProps) {
-    super(scope, id, {
-      zoneName: props.domain,
-    });
-  }
-}
-
 type CloudFrontDistributionRecordProps = {
   readonly domain: string;
-  readonly zone: route53.PublicHostedZone;
+  readonly zone: route53.IHostedZone;
   readonly distribution: cloudfront.CloudFrontWebDistribution;
 };
 

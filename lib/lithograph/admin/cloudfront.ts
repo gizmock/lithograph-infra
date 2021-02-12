@@ -31,7 +31,7 @@ export class AdminOriginAccessIdentity extends cloudfront.OriginAccessIdentity {
 type AdminDistributionProps = {
   readonly domain: string;
   readonly bucket: s3.Bucket;
-  readonly certificate: certificatemanager.DnsValidatedCertificate;
+  readonly certificate: certificatemanager.ICertificate;
   readonly identity: cloudfront.OriginAccessIdentity;
 };
 

@@ -13,7 +13,7 @@ import { WebBucket } from "./s3";
 
 type Props = {
   readonly domain: string;
-  readonly certificate: certificatemanager.DnsValidatedCertificate;
+  readonly certificate: certificatemanager.ICertificate;
   readonly renderAssetDirectory: string;
   readonly renderAssetHandler: string;
   readonly dynamodbWebPage: DynamoDBWebPage;

@@ -1,10 +1,10 @@
 import * as cdk from "@aws-cdk/core";
-import * as network from "./network";
 import * as admin from "./admin";
-import * as web from "./service";
-import { DynamoDBWebPage } from "./dynamodb/web-page";
 import { SiteCertificate } from "./certificate/site";
-import { SiteHostedZone } from "./network/route53";
+import { DynamoDBWebPage } from "./dynamodb/web-page";
+import { SiteHostedZone } from "./hosted-zone";
+import * as network from "./network";
+import * as web from "./service";
 
 type Props = {
   readonly domain: string;
@@ -18,21 +18,18 @@ export class Lithograph {
   constructor(scope: cdk.Stack, props: Props) {
     const adminDomain = props.adminSubDomainName + "." + props.domain;
 
-    const hostedZone = new SiteHostedZone(scope, "HostedZone", {
-      domain: props.domain,
-    });
-
+    const siteHostedZone = new SiteHostedZone(scope, props.domain);
     const siteCertificate = new SiteCertificate({
       scope: scope,
       webDomain: props.domain,
       adminDomain: adminDomain,
-      zone: hostedZone,
+      zone: siteHostedZone.hostedZone,
     });
 
     const networkStacks = new network.NetworkStacks({
       webDomain: props.domain,
       adminDomain: adminDomain,
-      hostedZone: hostedZone,
+      hostedZone: siteHostedZone.hostedZone,
     });
     const adminStacks = new admin.AdminStacks(scope, {
       domain: adminDomain,

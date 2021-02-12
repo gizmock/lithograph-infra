@@ -1,9 +1,9 @@
-import * as cdk from "@aws-cdk/core";
-import * as s3 from "@aws-cdk/aws-s3";
-import * as iam from "@aws-cdk/aws-iam";
-import * as certificatemanager from "@aws-cdk/aws-certificatemanager";
 import * as apigatewayv2 from "@aws-cdk/aws-apigatewayv2";
+import * as certificatemanager from "@aws-cdk/aws-certificatemanager";
 import * as cloudfront from "@aws-cdk/aws-cloudfront";
+import * as iam from "@aws-cdk/aws-iam";
+import * as s3 from "@aws-cdk/aws-s3";
+import * as cdk from "@aws-cdk/core";
 
 const API_CACHE_TTL = cdk.Duration.minutes(0);
 const DEFAULT_ROOT_OBJECT = "";
@@ -33,7 +33,7 @@ export class WebOriginAccessIdentity extends cloudfront.OriginAccessIdentity {
 
 type WebDistributionProps = WebOriginAccessIdentityProps & {
   readonly domain: string;
-  readonly certificate: certificatemanager.DnsValidatedCertificate;
+  readonly certificate: certificatemanager.ICertificate;
   readonly renderAPI: apigatewayv2.IHttpApi;
   readonly identity: cloudfront.OriginAccessIdentity;
 };
