@@ -8,7 +8,7 @@ export class DynamoDBWebPage {
 
   constructor(scope: cdk.Stack) {
     this.table = new Table(scope, "WebPageTable");
-    //    addCrossSearchGSI(this.table);
+    addCrossSearchGSI(this.table);
   }
 
   grantReadData(grantee: iam.IGrantable) {
