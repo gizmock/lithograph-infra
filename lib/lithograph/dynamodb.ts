@@ -1,14 +1,13 @@
 import * as dynamodb from "@aws-cdk/aws-dynamodb";
 import * as iam from "@aws-cdk/aws-iam";
 import * as cdk from "@aws-cdk/core";
-import { addCrossSearchGSI } from "./gsi";
 
 export class DynamoDBWebPage {
   private readonly table: dynamodb.Table;
 
   constructor(scope: cdk.Stack) {
     this.table = new Table(scope, "WebPageTable");
-    addCrossSearchGSI(this.table);
+    addGSICrossSearch(this.table);
   }
 
   grantReadData(grantee: iam.IGrantable) {
@@ -31,4 +30,20 @@ class Table extends dynamodb.Table {
       pointInTimeRecovery: true,
     });
   }
+}
+
+function addGSICrossSearch(table: dynamodb.Table) {
+  table.addGlobalSecondaryIndex({
+    indexName: "CrossSearchGSI",
+    partitionKey: {
+      name: "crossSearchId",
+      type: dynamodb.AttributeType.STRING,
+    },
+    sortKey: {
+      name: "crossSearchSort",
+      type: dynamodb.AttributeType.STRING,
+    },
+    nonKeyAttributes: ["id", "title", "published"],
+    projectionType: dynamodb.ProjectionType.INCLUDE,
+  });
 }

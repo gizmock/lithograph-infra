@@ -1,7 +1,7 @@
 import * as cdk from "@aws-cdk/core";
 import * as admin from "./admin";
-import { SiteCertificate } from "./certificate/site";
-import { DynamoDBWebPage } from "./dynamodb/web-page";
+import { SiteCertificate } from "./certificate";
+import { DynamoDBWebPage } from "./dynamodb";
 import { SiteHostedZone } from "./hosted-zone";
 import * as network from "./network";
 import * as web from "./service";
