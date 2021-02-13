@@ -5,7 +5,7 @@ import * as iam from "@aws-cdk/aws-iam";
 import * as lambda from "@aws-cdk/aws-lambda";
 import * as s3 from "@aws-cdk/aws-s3";
 import * as cdk from "@aws-cdk/core";
-import { DynamoDBWebPage } from "../dynamodb/web-page";
+import { DynamoDBWebPage } from "../dynamodb";
 import { RenderAPI } from "./api-gateway";
 import { WebDistribution, WebOriginAccessIdentity } from "./cloudfront";
 import { RenderFunction } from "./lambda";

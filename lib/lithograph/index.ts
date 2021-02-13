@@ -1,8 +1,8 @@
 import * as cdk from "@aws-cdk/core";
 import * as admin from "./admin";
-import { SiteCertificate } from "./certificate";
+import { Certificates } from "./certificate";
 import { DynamoDBWebPage } from "./dynamodb";
-import { SiteHostedZone } from "./hosted-zone";
+import { HostedZone } from "./hosted-zone";
 import * as network from "./network";
 import * as web from "./service";
 
@@ -18,17 +18,17 @@ export class Lithograph {
   constructor(scope: cdk.Stack, props: Props) {
     // network
     const adminDomain = props.adminSubDomainName + "." + props.domain;
-    const siteHostedZone = new SiteHostedZone(scope, props.domain);
-    const siteCertificate = new SiteCertificate({
+    const hostedZone = new HostedZone(scope, props.domain);
+    const certificates = new Certificates({
       scope: scope,
       webDomain: props.domain,
       adminDomain: adminDomain,
-      zone: siteHostedZone.hostedZone,
+      zone: hostedZone.zone,
     });
     const networkStacks = new network.NetworkStacks({
       webDomain: props.domain,
       adminDomain: adminDomain,
-      hostedZone: siteHostedZone.hostedZone,
+      hostedZone: hostedZone.zone,
     });
 
     // DynamoDB
@@ -37,7 +37,7 @@ export class Lithograph {
     // admin
     const adminResource = new admin.AdminResource(scope, {
       domain: adminDomain,
-      certificate: siteCertificate.adminCertificate,
+      certificate: certificates.adminCertificate,
       appSourceDirectory: props.adminAppSourceDirectory,
     });
     const adminGrantee = adminResource.getAuthenticatedGrantee();
@@ -46,7 +46,7 @@ export class Lithograph {
     // service
     const serviceResource = new web.ServiceResource(scope, {
       domain: props.domain,
-      certificate: siteCertificate.webCertificate,
+      certificate: certificates.webCertificate,
       renderAssetDirectory: props.webRenderAssetDirectory,
       renderAssetHandler: props.webRenderAssetHandler,
       dynamodbWebPage: dynamodbWebPage,
