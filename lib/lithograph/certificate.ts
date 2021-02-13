@@ -11,7 +11,7 @@ type Props = {
   zone: route53.IHostedZone;
 };
 
-export class SiteCertificate {
+export class Certificates {
   readonly webCertificate: certificatemanager.ICertificate;
   readonly adminCertificate: certificatemanager.ICertificate;
 
