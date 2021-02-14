@@ -16,7 +16,7 @@ type Props = {
 
 export class Lithograph {
   constructor(scope: cdk.Stack, props: Props) {
-    // Network
+    // DNS
     const hostedZone = new HostedZone(scope, props.serviceDomain);
     const certificates = new Certificates(scope, {
       serviceDomain: props.serviceDomain,
@@ -33,7 +33,7 @@ export class Lithograph {
       domain: props.adminDomain,
       appSourceDirectory: props.adminAppSourceDirectory,
       zone: hostedZone.zone,
-      certificate: certificates.adminCertificate,
+      certificate: certificates.admin,
       webFileBucket: webFileBucket.bucket,
       webPageTable: webPageTable.table,
     });
@@ -42,7 +42,7 @@ export class Lithograph {
     createServiceResources(scope, {
       domain: props.serviceDomain,
       zone: hostedZone.zone,
-      certificate: certificates.webCertificate,
+      certificate: certificates.service,
       webFileBucket: webFileBucket.bucket,
       webPageTable: webPageTable.table,
       renderAssetDirectory: props.webRenderAssetDirectory,

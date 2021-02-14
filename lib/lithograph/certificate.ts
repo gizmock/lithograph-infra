@@ -11,18 +11,18 @@ type Props = {
 };
 
 export class Certificates {
-  readonly webCertificate: certificatemanager.ICertificate;
-  readonly adminCertificate: certificatemanager.ICertificate;
+  readonly service: certificatemanager.ICertificate;
+  readonly admin: certificatemanager.ICertificate;
 
   constructor(scope: cdk.Construct, props: Props) {
-    this.webCertificate = new Certificate(
+    this.service = new Certificate(
       scope,
       "WebCertificate",
       props.serviceDomain,
       props.zone
     );
 
-    this.adminCertificate = new Certificate(
+    this.admin = new Certificate(
       scope,
       "AdminCertificate",
       props.adminDomain,
