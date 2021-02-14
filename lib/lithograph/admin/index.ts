@@ -6,7 +6,7 @@ import { AdminSpaCloudFrontDistribution } from "./cloudfront";
 import { AdminCognito } from "./cognito";
 import { createAdminDNSRecords } from "./route53";
 import { AdminS3BcuketSpa } from "./s3";
-import { addSpaBucketDeployment } from "./s3-deployment";
+import { addAdminSpaBucketDeployment } from "./s3-deployment";
 
 type Props = {
   domain: string;
@@ -29,7 +29,7 @@ export class AdminResource {
       certificate: props.certificate,
     });
 
-    addSpaBucketDeployment(scope, {
+    addAdminSpaBucketDeployment(scope, {
       bucket: spaBucket.bucket,
       distribution: this.spaDistribution.distribution,
       sourceDirectory: props.appSourceDirectory,

@@ -9,7 +9,10 @@ type Props = {
   sourceDirectory: string;
 };
 
-export function addSpaBucketDeployment(scope: cdk.Construct, props: Props) {
+export function addAdminSpaBucketDeployment(
+  scope: cdk.Construct,
+  props: Props
+) {
   new BucketDeployment(scope, "AdminS3Deploy", props);
 }
 
