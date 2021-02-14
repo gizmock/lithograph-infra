@@ -10,8 +10,8 @@ type Props = {
   serviceDomain: string;
   adminDomain: string;
   adminAppSourceDirectory: string;
-  webRenderAssetDirectory: string;
-  webRenderAssetHandler: string;
+  serviceRenderAssetDirectory: string;
+  serviceRenderAssetHandler: string;
 };
 
 export class Lithograph {
@@ -45,8 +45,8 @@ export class Lithograph {
       certificate: certificates.service,
       webFileBucket: webFileBucket.bucket,
       webPageTable: webPageTable.table,
-      renderAssetDirectory: props.webRenderAssetDirectory,
-      renderAssetHandler: props.webRenderAssetHandler,
+      renderAssetDirectory: props.serviceRenderAssetDirectory,
+      renderAssetHandler: props.serviceRenderAssetHandler,
     });
   }
 }
