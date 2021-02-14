@@ -7,8 +7,8 @@ import { WebFileBucket } from "./s3";
 import { createServiceResources } from "./service";
 
 type Props = {
-  domain: string;
-  adminSubDomainName: string;
+  serviceDomain: string;
+  adminDomain: string;
   adminAppSourceDirectory: string;
   webRenderAssetDirectory: string;
   webRenderAssetHandler: string;
@@ -17,12 +17,10 @@ type Props = {
 export class Lithograph {
   constructor(scope: cdk.Stack, props: Props) {
     // Network
-    const hostedZone = new HostedZone(scope, props.domain);
-    const adminDomain = props.adminSubDomainName + "." + props.domain;
-    const certificates = new Certificates({
-      scope: scope,
-      webDomain: props.domain,
-      adminDomain: adminDomain,
+    const hostedZone = new HostedZone(scope, props.serviceDomain);
+    const certificates = new Certificates(scope, {
+      serviceDomain: props.serviceDomain,
+      adminDomain: props.adminDomain,
       zone: hostedZone.zone,
     });
     // Storage
@@ -32,7 +30,7 @@ export class Lithograph {
 
     // admin
     createAdminResources(scope, {
-      domain: adminDomain,
+      domain: props.adminDomain,
       appSourceDirectory: props.adminAppSourceDirectory,
       zone: hostedZone.zone,
       certificate: certificates.adminCertificate,
@@ -42,7 +40,7 @@ export class Lithograph {
 
     // service
     createServiceResources(scope, {
-      domain: props.domain,
+      domain: props.serviceDomain,
       zone: hostedZone.zone,
       certificate: certificates.webCertificate,
       webFileBucket: webFileBucket.bucket,

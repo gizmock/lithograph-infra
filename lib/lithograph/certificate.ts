@@ -5,8 +5,7 @@ import * as cdk from "@aws-cdk/core";
 const CERTIFICATE_REGION: string = "us-east-1";
 
 type Props = {
-  scope: cdk.Construct;
-  webDomain: string;
+  serviceDomain: string;
   adminDomain: string;
   zone: route53.IHostedZone;
 };
@@ -15,16 +14,16 @@ export class Certificates {
   readonly webCertificate: certificatemanager.ICertificate;
   readonly adminCertificate: certificatemanager.ICertificate;
 
-  constructor(props: Props) {
+  constructor(scope: cdk.Construct, props: Props) {
     this.webCertificate = new Certificate(
-      props.scope,
+      scope,
       "WebCertificate",
-      props.webDomain,
+      props.serviceDomain,
       props.zone
     );
 
     this.adminCertificate = new Certificate(
-      props.scope,
+      scope,
       "AdminCertificate",
       props.adminDomain,
       props.zone
