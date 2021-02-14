@@ -18,31 +18,29 @@ type Props = {
   webPageTable: dynamodb.ITable;
 };
 
-export class AdminResource {
-  constructor(scope: cdk.Stack, props: Props) {
-    const consoleBucket = new AdminConsoleBcuket(scope);
+export function createAdminResources(scope: cdk.Stack, props: Props) {
+  const bucket = new AdminConsoleBcuket(scope);
 
-    const consoleDistribution = new AdminConsoleDistribution(scope, {
-      domain: props.domain,
-      bucket: consoleBucket.bucket,
-      certificate: props.certificate,
-    });
+  const distribution = new AdminConsoleDistribution(scope, {
+    domain: props.domain,
+    bucket: bucket.bucket,
+    certificate: props.certificate,
+  });
 
-    addAdminConsoleBucketDeployment(scope, {
-      bucket: consoleBucket.bucket,
-      distribution: consoleDistribution.distribution,
-      sourceDirectory: props.appSourceDirectory,
-    });
+  addAdminConsoleBucketDeployment(scope, {
+    bucket: bucket.bucket,
+    distribution: distribution.distribution,
+    sourceDirectory: props.appSourceDirectory,
+  });
 
-    createAdminDNSRecords(scope, {
-      domain: props.domain,
-      zone: props.zone,
-      distribution: consoleDistribution.distribution,
-    });
+  createAdminDNSRecords(scope, {
+    domain: props.domain,
+    zone: props.zone,
+    distribution: distribution.distribution,
+  });
 
-    const adminCognito = new AdminCognito(scope);
-    const authenticatedGrantee = adminCognito.getAuthenticatedGrantee();
-    props.webFileBucket.grantReadWrite(authenticatedGrantee);
-    props.webPageTable.grantReadWriteData(authenticatedGrantee);
-  }
+  const cognito = new AdminCognito(scope);
+  const authenticatedGrantee = cognito.getAuthenticatedGrantee();
+  props.webFileBucket.grantReadWrite(authenticatedGrantee);
+  props.webPageTable.grantReadWriteData(authenticatedGrantee);
 }

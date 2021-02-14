@@ -9,38 +9,54 @@ const API_CACHE_TTL = cdk.Duration.minutes(0);
 const DEFAULT_ROOT_OBJECT = "";
 const PUBLIC_FILE_ASSET_PATH = "public/*";
 
-type WebOriginAccessIdentityProps = {
+type Props = {
+  domain: string;
+  certificate: certificatemanager.ICertificate;
   bucket: s3.IBucket;
+  renderAPI: apigatewayv2.IHttpApi;
 };
 
-export class WebOriginAccessIdentity extends cloudfront.OriginAccessIdentity {
-  constructor(
-    scope: cdk.Construct,
-    id: string,
-    props: WebOriginAccessIdentityProps
-  ) {
+export class ServiceDistribution {
+  readonly distribution: cloudfront.IDistribution;
+
+  constructor(scope: cdk.Stack, props: Props) {
+    const identity = new OriginAccessIdentity(
+      scope,
+      "WebCloudFrontIdentity",
+      props.bucket
+    );
+
+    this.distribution = new Distribution(
+      scope,
+      "WebCloudFrontDistribution",
+      identity,
+      props
+    );
+  }
+}
+
+class OriginAccessIdentity extends cloudfront.OriginAccessIdentity {
+  constructor(scope: cdk.Construct, id: string, bucket: s3.IBucket) {
     super(scope, id);
-    props.bucket.addToResourcePolicy(
+
+    bucket.addToResourcePolicy(
       new iam.PolicyStatement({
         actions: ["s3:GetObject"],
         effect: iam.Effect.ALLOW,
         principals: [this.grantPrincipal],
-        resources: [`${props.bucket.bucketArn}/*`],
+        resources: [`${bucket.bucketArn}/*`],
       })
     );
   }
 }
 
-type WebDistributionProps = {
-  bucket: s3.IBucket;
-  domain: string;
-  certificate: certificatemanager.ICertificate;
-  renderAPI: apigatewayv2.IHttpApi;
-  identity: cloudfront.OriginAccessIdentity;
-};
-
-export class WebDistribution extends cloudfront.CloudFrontWebDistribution {
-  constructor(scope: cdk.Stack, id: string, props: WebDistributionProps) {
+class Distribution extends cloudfront.CloudFrontWebDistribution {
+  constructor(
+    scope: cdk.Stack,
+    id: string,
+    identity: cloudfront.IOriginAccessIdentity,
+    props: Props
+  ) {
     super(scope, id, {
       defaultRootObject: DEFAULT_ROOT_OBJECT,
       originConfigs: [
@@ -48,7 +64,7 @@ export class WebDistribution extends cloudfront.CloudFrontWebDistribution {
         {
           s3OriginSource: {
             s3BucketSource: props.bucket,
-            originAccessIdentity: props.identity,
+            originAccessIdentity: identity,
           },
           behaviors: [
             {

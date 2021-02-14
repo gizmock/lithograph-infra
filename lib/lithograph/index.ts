@@ -1,11 +1,10 @@
 import * as cdk from "@aws-cdk/core";
-import * as admin from "./admin";
+import { createAdminResources } from "./admin";
 import { Certificates } from "./certificate";
 import { WebPageTable } from "./dynamodb";
 import { HostedZone } from "./hosted-zone";
-import * as network from "./network";
 import { WebFileBucket } from "./s3";
-import * as web from "./service";
+import { createServiceResources } from "./service";
 
 type Props = {
   domain: string;
@@ -17,9 +16,9 @@ type Props = {
 
 export class Lithograph {
   constructor(scope: cdk.Stack, props: Props) {
-    // DNS
-    const adminDomain = props.adminSubDomainName + "." + props.domain;
+    // Network
     const hostedZone = new HostedZone(scope, props.domain);
+    const adminDomain = props.adminSubDomainName + "." + props.domain;
     const certificates = new Certificates({
       scope: scope,
       webDomain: props.domain,
@@ -32,7 +31,7 @@ export class Lithograph {
     const webPageTable = new WebPageTable(scope);
 
     // admin
-    const adminResource = new admin.AdminResource(scope, {
+    createAdminResources(scope, {
       domain: adminDomain,
       appSourceDirectory: props.adminAppSourceDirectory,
       zone: hostedZone.zone,
@@ -42,22 +41,14 @@ export class Lithograph {
     });
 
     // service
-    const serviceResource = new web.ServiceResource(scope, {
+    createServiceResources(scope, {
       domain: props.domain,
+      zone: hostedZone.zone,
       certificate: certificates.webCertificate,
       webFileBucket: webFileBucket.bucket,
       webPageTable: webPageTable.table,
       renderAssetDirectory: props.webRenderAssetDirectory,
       renderAssetHandler: props.webRenderAssetHandler,
-    });
-
-    // TODO delete this
-    const networkStacks = new network.NetworkStacks({
-      webDomain: props.domain,
-      hostedZone: hostedZone.zone,
-    });
-    networkStacks.createDNSRecords(scope, {
-      webDistrribution: serviceResource.distribution,
     });
   }
 }
