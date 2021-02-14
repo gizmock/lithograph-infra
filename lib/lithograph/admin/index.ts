@@ -5,7 +5,8 @@ import * as s3 from "@aws-cdk/aws-s3";
 import * as cdk from "@aws-cdk/core";
 import { AdminDistribution, AdminOriginAccessIdentity } from "./cloudfront";
 import { AdminCognito } from "./cognito";
-import { AdminBucket, AdminBucketDeployment } from "./s3";
+import { AdminS3BcuketSpa } from "./s3";
+import { AdminS3DeploymentSpa } from "./s3-deployment";
 
 type Props = {
   readonly domain: string;
@@ -15,17 +16,17 @@ type Props = {
 };
 
 export class AdminResource {
-  readonly bucket: s3.Bucket;
   readonly distribution: cloudfront.CloudFrontWebDistribution;
   private readonly adminCognito: AdminCognito;
 
   constructor(scope: cdk.Stack, props: Props) {
-    this.bucket = new AdminBucket(scope, "AdminS3Bucket");
+    const spaBucket = new AdminS3BcuketSpa(scope);
+
     const identity = new AdminOriginAccessIdentity(
       scope,
       "AdminCloudFrontIdentity",
       {
-        bucket: this.bucket,
+        bucket: spaBucket.bucket,
       }
     );
 
@@ -34,14 +35,14 @@ export class AdminResource {
       "AdminCloudFrontDistribution",
       {
         domain: props.domain,
-        bucket: this.bucket,
+        bucket: spaBucket.bucket,
         certificate: props.certificate,
         identity: identity,
       }
     );
 
-    new AdminBucketDeployment(scope, "AdminS3Deploy", {
-      bucket: this.bucket,
+    new AdminS3DeploymentSpa(scope, {
+      bucket: spaBucket.bucket,
       distribution: this.distribution,
       sourceDirectory: props.appSourceDirectory,
     });

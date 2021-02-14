@@ -7,11 +7,11 @@ import * as network from "./network";
 import * as web from "./service";
 
 type Props = {
-  readonly domain: string;
-  readonly adminSubDomainName: string;
-  readonly adminAppSourceDirectory: string;
-  readonly webRenderAssetDirectory: string;
-  readonly webRenderAssetHandler: string;
+  domain: string;
+  adminSubDomainName: string;
+  adminAppSourceDirectory: string;
+  webRenderAssetDirectory: string;
+  webRenderAssetHandler: string;
 };
 
 export class Lithograph {

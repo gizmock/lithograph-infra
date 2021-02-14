@@ -7,7 +7,7 @@ import * as certificatemanager from "@aws-cdk/aws-certificatemanager";
 const ROOT_PAGE_PATH: string = "/index.html";
 
 type AdminOriginAccessIdentityProps = {
-  readonly bucket: s3.Bucket;
+  readonly bucket: s3.IBucket;
 };
 
 export class AdminOriginAccessIdentity extends cloudfront.OriginAccessIdentity {
@@ -30,7 +30,7 @@ export class AdminOriginAccessIdentity extends cloudfront.OriginAccessIdentity {
 
 type AdminDistributionProps = {
   readonly domain: string;
-  readonly bucket: s3.Bucket;
+  readonly bucket: s3.IBucket;
   readonly certificate: certificatemanager.ICertificate;
   readonly identity: cloudfront.OriginAccessIdentity;
 };
