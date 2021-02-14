@@ -7,52 +7,44 @@ const COGNITO_STATUS_UNAUTHENTICATED = "unauthenticated";
 const COGNITO_STATUS_AUTHENTICATED = "authenticated";
 
 export class AdminCognito {
-  private readonly userPool: cognito.UserPool;
-  private readonly userPoolClient: cognito.UserPoolClient;
-  private readonly identityPool: cognito.CfnIdentityPool;
-  private readonly unauthenticatedRole: iam.Role;
-  private readonly authenticatedRole: iam.Role;
+  readonly authenticatedRole: iam.IRole;
 
   constructor(scope: cdk.Construct) {
-    this.userPool = new AdminUserPool(scope, "AdminCognitoUserPool");
-    this.userPoolClient = new AdminUserPoolClient(
+    const userPool = new AdminUserPool(scope, "AdminCognitoUserPool");
+    const userPoolClient = new AdminUserPoolClient(
       scope,
       "AdminCognitoUserPoolClient",
-      this.userPool
+      userPool
     );
 
-    this.identityPool = new AdminIdentityPool(
+    const identityPool = new AdminIdentityPool(
       scope,
       "AdminCognitoIdentityPool",
-      this.userPool,
-      this.userPoolClient
+      userPool,
+      userPoolClient
     );
 
-    this.unauthenticatedRole = new AdminUnauthenticatedRole(
+    const unauthenticatedRole = new AdminUnauthenticatedRole(
       scope,
       "AdminCognitoIdentityUnauthenticatedRole",
-      this.identityPool
+      identityPool
     );
 
     this.authenticatedRole = new AdminAuthenticatedRole(
       scope,
       "AdminCognitoIdentityAuthenticatedRole",
-      this.identityPool
+      identityPool
     );
 
     new AdminIdentityRoleAttachement(
       scope,
       "AdminCognitoIdentityRoleAttachment",
       {
-        identityPool: this.identityPool,
-        unauthenticatedRole: this.unauthenticatedRole,
+        identityPool: identityPool,
+        unauthenticatedRole: unauthenticatedRole,
         authenticatedRole: this.authenticatedRole,
       }
     );
-  }
-
-  getAuthenticatedGrantee(): iam.IGrantable {
-    return this.authenticatedRole;
   }
 }
 

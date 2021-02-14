@@ -7,7 +7,7 @@ import { AdminConsoleDistribution } from "./cloudfront";
 import { AdminCognito } from "./cognito";
 import { createAdminDNSRecords } from "./route53";
 import { AdminConsoleBcuket } from "./s3";
-import { addAdminConsoleBucketDeployment } from "./s3-deployment";
+import { createAdminConsoleBucketDeployment } from "./s3-deployment";
 
 type Props = {
   domain: string;
@@ -27,7 +27,7 @@ export function createAdminResources(scope: cdk.Stack, props: Props) {
     certificate: props.certificate,
   });
 
-  addAdminConsoleBucketDeployment(scope, {
+  createAdminConsoleBucketDeployment(scope, {
     bucket: bucket.bucket,
     distribution: distribution.distribution,
     sourceDirectory: props.appSourceDirectory,
@@ -40,7 +40,6 @@ export function createAdminResources(scope: cdk.Stack, props: Props) {
   });
 
   const cognito = new AdminCognito(scope);
-  const authenticatedGrantee = cognito.getAuthenticatedGrantee();
-  props.webFileBucket.grantReadWrite(authenticatedGrantee);
-  props.webPageTable.grantReadWriteData(authenticatedGrantee);
+  props.webFileBucket.grantReadWrite(cognito.authenticatedRole);
+  props.webPageTable.grantReadWriteData(cognito.authenticatedRole);
 }
