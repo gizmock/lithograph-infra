@@ -155,8 +155,8 @@ class AdminIdentityRoleAttachement extends cognito.CfnIdentityPoolRoleAttachment
     id: string,
     props: {
       identityPool: cognito.CfnIdentityPool;
-      unauthenticatedRole: iam.Role;
-      authenticatedRole: iam.Role;
+      unauthenticatedRole: iam.IRole;
+      authenticatedRole: iam.IRole;
     }
   ) {
     super(scope, id, {
