@@ -3,7 +3,7 @@ import * as cdk from "@aws-cdk/core";
 
 const INDEX_FILE: string = "index.html";
 
-export class AdminS3BcuketSpa {
+export class AdminConsoleBcuket {
   readonly bucket: s3.IBucket;
 
   constructor(scope: cdk.Construct) {

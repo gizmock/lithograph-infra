@@ -9,7 +9,7 @@ type Props = {
   sourceDirectory: string;
 };
 
-export function addAdminSpaBucketDeployment(
+export function addAdminConsoleBucketDeployment(
   scope: cdk.Construct,
   props: Props
 ) {

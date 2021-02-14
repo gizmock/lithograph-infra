@@ -12,7 +12,7 @@ type Props = {
   certificate: certificatemanager.ICertificate;
 };
 
-export class AdminSpaCloudFrontDistribution {
+export class AdminConsoleDistribution {
   readonly distribution: cloudfront.IDistribution;
 
   constructor(scope: cdk.Construct, props: Props) {

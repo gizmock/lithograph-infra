@@ -3,11 +3,11 @@ import * as dynamodb from "@aws-cdk/aws-dynamodb";
 import * as route53 from "@aws-cdk/aws-route53";
 import * as s3 from "@aws-cdk/aws-s3";
 import * as cdk from "@aws-cdk/core";
-import { AdminSpaCloudFrontDistribution } from "./cloudfront";
+import { AdminConsoleDistribution } from "./cloudfront";
 import { AdminCognito } from "./cognito";
 import { createAdminDNSRecords } from "./route53";
-import { AdminS3BcuketSpa } from "./s3";
-import { addAdminSpaBucketDeployment } from "./s3-deployment";
+import { AdminConsoleBcuket } from "./s3";
+import { addAdminConsoleBucketDeployment } from "./s3-deployment";
 
 type Props = {
   domain: string;
@@ -20,24 +20,24 @@ type Props = {
 
 export class AdminResource {
   constructor(scope: cdk.Stack, props: Props) {
-    const spaBucket = new AdminS3BcuketSpa(scope);
+    const consoleBucket = new AdminConsoleBcuket(scope);
 
-    const spaDistribution = new AdminSpaCloudFrontDistribution(scope, {
+    const consoleDistribution = new AdminConsoleDistribution(scope, {
       domain: props.domain,
-      bucket: spaBucket.bucket,
+      bucket: consoleBucket.bucket,
       certificate: props.certificate,
     });
 
-    addAdminSpaBucketDeployment(scope, {
-      bucket: spaBucket.bucket,
-      distribution: spaDistribution.distribution,
+    addAdminConsoleBucketDeployment(scope, {
+      bucket: consoleBucket.bucket,
+      distribution: consoleDistribution.distribution,
       sourceDirectory: props.appSourceDirectory,
     });
 
     createAdminDNSRecords(scope, {
       domain: props.domain,
       zone: props.zone,
-      distribution: spaDistribution.distribution,
+      distribution: consoleDistribution.distribution,
     });
 
     const adminCognito = new AdminCognito(scope);
