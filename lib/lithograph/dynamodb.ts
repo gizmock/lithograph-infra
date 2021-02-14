@@ -1,5 +1,4 @@
 import * as dynamodb from "@aws-cdk/aws-dynamodb";
-import * as iam from "@aws-cdk/aws-iam";
 import * as cdk from "@aws-cdk/core";
 
 export class DynamoDBWebPage {
