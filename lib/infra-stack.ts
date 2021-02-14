@@ -4,7 +4,7 @@ import * as lithograph from "./lithograph";
 const CONTEXT_DOMAIN = "domain";
 const ADMIN_SUB_DOMAIN_NAME = "admin";
 const ADMIN_APP_SOURCE_DIRECTORY = "../lithograph-admin/build";
-const SERVICE_RENDER_ASSET_DIRECTORY = "../lithograph-web/render/bin";
+const SERVICE_RENDER_ASSET_DIRECTORY = "../lithograph-service/render/bin";
 const SERVICE_RENDER_ASSET_HANDLER = "main";
 
 export class InfraStack extends cdk.Stack {
