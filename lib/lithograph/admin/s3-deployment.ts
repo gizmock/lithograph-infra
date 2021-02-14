@@ -5,14 +5,12 @@ import * as cdk from "@aws-cdk/core";
 
 type Props = {
   bucket: s3.IBucket;
-  distribution: cloudfront.CloudFrontWebDistribution;
+  distribution: cloudfront.IDistribution;
   sourceDirectory: string;
 };
 
-export class AdminS3DeploymentSpa {
-  constructor(scope: cdk.Construct, props: Props) {
-    new BucketDeployment(scope, "AdminS3Deploy", props);
-  }
+export function addSpaBucketDeployment(scope: cdk.Construct, props: Props) {
+  new BucketDeployment(scope, "AdminS3Deploy", props);
 }
 
 class BucketDeployment extends s3deploy.BucketDeployment {

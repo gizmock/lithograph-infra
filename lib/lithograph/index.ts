@@ -25,11 +25,6 @@ export class Lithograph {
       adminDomain: adminDomain,
       zone: hostedZone.zone,
     });
-    const networkStacks = new network.NetworkStacks({
-      webDomain: props.domain,
-      adminDomain: adminDomain,
-      hostedZone: hostedZone.zone,
-    });
 
     // DynamoDB
     const dynamodbWebPage = new DynamoDBWebPage(scope);
@@ -37,8 +32,9 @@ export class Lithograph {
     // admin
     const adminResource = new admin.AdminResource(scope, {
       domain: adminDomain,
-      certificate: certificates.adminCertificate,
       appSourceDirectory: props.adminAppSourceDirectory,
+      zone: hostedZone.zone,
+      certificate: certificates.adminCertificate,
       webPageTable: dynamodbWebPage.table,
     });
 
@@ -50,8 +46,13 @@ export class Lithograph {
       renderAssetHandler: props.webRenderAssetHandler,
       webPageTable: dynamodbWebPage.table,
     });
+
+    // TODO delete this
+    const networkStacks = new network.NetworkStacks({
+      webDomain: props.domain,
+      hostedZone: hostedZone.zone,
+    });
     networkStacks.createDNSRecords(scope, {
-      adminDistribution: adminResource.distribution,
       webDistrribution: serviceResource.distribution,
     });
     serviceResource.addBucketAccessToRole(

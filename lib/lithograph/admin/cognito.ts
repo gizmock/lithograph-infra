@@ -1,6 +1,6 @@
-import * as cdk from "@aws-cdk/core";
 import * as cognito from "@aws-cdk/aws-cognito";
 import * as iam from "@aws-cdk/aws-iam";
+import * as cdk from "@aws-cdk/core";
 
 const COGNITO_IDENTITY_DOMAIN = "cognito-identity.amazonaws.com";
 const COGNITO_STATUS_UNAUTHENTICATED = "unauthenticated";

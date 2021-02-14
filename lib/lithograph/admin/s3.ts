@@ -1,6 +1,8 @@
 import * as s3 from "@aws-cdk/aws-s3";
 import * as cdk from "@aws-cdk/core";
 
+const INDEX_FILE: string = "index.html";
+
 export class AdminS3BcuketSpa {
   readonly bucket: s3.IBucket;
 
@@ -8,8 +10,6 @@ export class AdminS3BcuketSpa {
     this.bucket = new Bucket(scope, "AdminS3Bucket");
   }
 }
-
-const INDEX_FILE: string = "index.html";
 
 class Bucket extends s3.Bucket {
   constructor(scope: cdk.Construct, id: string) {

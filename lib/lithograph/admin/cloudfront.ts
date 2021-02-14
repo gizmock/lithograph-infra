@@ -1,42 +1,61 @@
-import * as cdk from "@aws-cdk/core";
-import * as cloudfront from "@aws-cdk/aws-cloudfront";
-import * as s3 from "@aws-cdk/aws-s3";
-import * as iam from "@aws-cdk/aws-iam";
 import * as certificatemanager from "@aws-cdk/aws-certificatemanager";
+import * as cloudfront from "@aws-cdk/aws-cloudfront";
+import * as iam from "@aws-cdk/aws-iam";
+import * as s3 from "@aws-cdk/aws-s3";
+import * as cdk from "@aws-cdk/core";
 
 const ROOT_PAGE_PATH: string = "/index.html";
 
-type AdminOriginAccessIdentityProps = {
-  readonly bucket: s3.IBucket;
+type Props = {
+  domain: string;
+  bucket: s3.IBucket;
+  certificate: certificatemanager.ICertificate;
 };
 
-export class AdminOriginAccessIdentity extends cloudfront.OriginAccessIdentity {
-  constructor(
-    scope: cdk.Construct,
-    id: string,
-    props: AdminOriginAccessIdentityProps
-  ) {
+export class AdminSpaCloudFrontDistribution {
+  readonly distribution: cloudfront.IDistribution;
+
+  constructor(scope: cdk.Construct, props: Props) {
+    const identity = new OriginAccessIdentity(
+      scope,
+      "AdminCloudFrontIdentity",
+      props.bucket
+    );
+
+    this.distribution = new Distribution(
+      scope,
+      "AdminCloudFrontDistribution",
+      identity,
+      {
+        domain: props.domain,
+        bucket: props.bucket,
+        certificate: props.certificate,
+      }
+    );
+  }
+}
+
+class OriginAccessIdentity extends cloudfront.OriginAccessIdentity {
+  constructor(scope: cdk.Construct, id: string, bucket: s3.IBucket) {
     super(scope, id);
-    props.bucket.addToResourcePolicy(
+    bucket.addToResourcePolicy(
       new iam.PolicyStatement({
         actions: ["s3:GetObject"],
         effect: iam.Effect.ALLOW,
         principals: [this.grantPrincipal],
-        resources: [`${props.bucket.bucketArn}/*`],
+        resources: [`${bucket.bucketArn}/*`],
       })
     );
   }
 }
 
-type AdminDistributionProps = {
-  readonly domain: string;
-  readonly bucket: s3.IBucket;
-  readonly certificate: certificatemanager.ICertificate;
-  readonly identity: cloudfront.OriginAccessIdentity;
-};
-
-export class AdminDistribution extends cloudfront.CloudFrontWebDistribution {
-  constructor(scope: cdk.Construct, id: string, props: AdminDistributionProps) {
+class Distribution extends cloudfront.CloudFrontWebDistribution {
+  constructor(
+    scope: cdk.Construct,
+    id: string,
+    identity: cloudfront.IOriginAccessIdentity,
+    props: Props
+  ) {
     super(scope, id, {
       errorConfigurations: [
         {
@@ -56,7 +75,7 @@ export class AdminDistribution extends cloudfront.CloudFrontWebDistribution {
         {
           s3OriginSource: {
             s3BucketSource: props.bucket,
-            originAccessIdentity: props.identity,
+            originAccessIdentity: identity,
           },
           behaviors: [
             {
