@@ -1,9 +1,10 @@
 import * as cdk from "@aws-cdk/core";
 import * as admin from "./admin";
 import { Certificates } from "./certificate";
-import { DynamoDBWebPage } from "./dynamodb";
+import { WebPageTable } from "./dynamodb";
 import { HostedZone } from "./hosted-zone";
 import * as network from "./network";
+import { WebFileBucket } from "./s3";
 import * as web from "./service";
 
 type Props = {
@@ -26,8 +27,11 @@ export class Lithograph {
       zone: hostedZone.zone,
     });
 
+    // S3
+    const webFileBucket = new WebFileBucket(scope);
+
     // DynamoDB
-    const dynamodbWebPage = new DynamoDBWebPage(scope);
+    const webPageTable = new WebPageTable(scope);
 
     // admin
     const adminResource = new admin.AdminResource(scope, {
@@ -35,7 +39,8 @@ export class Lithograph {
       appSourceDirectory: props.adminAppSourceDirectory,
       zone: hostedZone.zone,
       certificate: certificates.adminCertificate,
-      webPageTable: dynamodbWebPage.table,
+      webFileBucket: webFileBucket.bucket,
+      webPageTable: webPageTable.table,
     });
 
     // service
@@ -44,7 +49,8 @@ export class Lithograph {
       certificate: certificates.webCertificate,
       renderAssetDirectory: props.webRenderAssetDirectory,
       renderAssetHandler: props.webRenderAssetHandler,
-      webPageTable: dynamodbWebPage.table,
+      webFileBucket: webFileBucket.bucket,
+      webPageTable: webPageTable.table,
     });
 
     // TODO delete this
@@ -55,8 +61,5 @@ export class Lithograph {
     networkStacks.createDNSRecords(scope, {
       webDistrribution: serviceResource.distribution,
     });
-    serviceResource.addBucketAccessToRole(
-      adminResource.getAuthenticatedGrantee()
-    );
   }
 }

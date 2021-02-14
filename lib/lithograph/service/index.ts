@@ -9,18 +9,17 @@ import * as cdk from "@aws-cdk/core";
 import { RenderAPI } from "./api-gateway";
 import { WebDistribution, WebOriginAccessIdentity } from "./cloudfront";
 import { RenderFunction } from "./lambda";
-import { WebBucket } from "./s3";
 
 type Props = {
-  readonly domain: string;
-  readonly certificate: certificatemanager.ICertificate;
-  readonly renderAssetDirectory: string;
-  readonly renderAssetHandler: string;
-  readonly webPageTable: dynamodb.ITable;
+  domain: string;
+  certificate: certificatemanager.ICertificate;
+  renderAssetDirectory: string;
+  renderAssetHandler: string;
+  webFileBucket: s3.IBucket;
+  webPageTable: dynamodb.ITable;
 };
 
 export class ServiceResource {
-  readonly bucket: s3.Bucket;
   readonly renderFunction: lambda.Function;
   readonly renderAPI: apigatewayv2.HttpApi;
   readonly distribution: cloudfront.CloudFrontWebDistribution;
@@ -30,33 +29,30 @@ export class ServiceResource {
       assetDirectory: props.renderAssetDirectory,
       assetHandler: props.renderAssetHandler,
     });
+
     this.renderAPI = new RenderAPI(scope, "WebRenderAPI", {
       handler: this.renderFunction,
     });
-    this.bucket = new WebBucket(scope, "WebS3Bucket");
+
     const identity = new WebOriginAccessIdentity(
       scope,
       "WebCloudFrontIdentity",
       {
-        bucket: this.bucket,
+        bucket: props.webFileBucket,
       }
     );
+
     this.distribution = new WebDistribution(
       scope,
       "WebCloudFrontDistribution",
       {
         domain: props.domain,
-        bucket: this.bucket,
+        bucket: props.webFileBucket,
         certificate: props.certificate,
         renderAPI: this.renderAPI,
         identity: identity,
       }
     );
     props.webPageTable.grantReadData(this.renderFunction.grantPrincipal);
-  }
-
-  addBucketAccessToRole(grantee: iam.IGrantable): void {
-    const bucket = this.bucket;
-    bucket.grantReadWrite(grantee);
   }
 }

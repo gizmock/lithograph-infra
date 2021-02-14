@@ -10,7 +10,7 @@ const DEFAULT_ROOT_OBJECT = "";
 const PUBLIC_FILE_ASSET_PATH = "public/*";
 
 type WebOriginAccessIdentityProps = {
-  readonly bucket: s3.Bucket;
+  readonly bucket: s3.IBucket;
 };
 
 export class WebOriginAccessIdentity extends cloudfront.OriginAccessIdentity {

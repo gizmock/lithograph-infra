@@ -1,6 +1,7 @@
 import * as certificatemanager from "@aws-cdk/aws-certificatemanager";
 import * as dynamodb from "@aws-cdk/aws-dynamodb";
 import * as route53 from "@aws-cdk/aws-route53";
+import * as s3 from "@aws-cdk/aws-s3";
 import * as cdk from "@aws-cdk/core";
 import { AdminSpaCloudFrontDistribution } from "./cloudfront";
 import { AdminCognito } from "./cognito";
@@ -13,17 +14,15 @@ type Props = {
   appSourceDirectory: string;
   certificate: certificatemanager.ICertificate;
   zone: route53.IHostedZone;
+  webFileBucket: s3.IBucket;
   webPageTable: dynamodb.ITable;
 };
 
 export class AdminResource {
-  private readonly adminCognito: AdminCognito;
-  private readonly spaDistribution: AdminSpaCloudFrontDistribution;
-
   constructor(scope: cdk.Stack, props: Props) {
     const spaBucket = new AdminS3BcuketSpa(scope);
 
-    this.spaDistribution = new AdminSpaCloudFrontDistribution(scope, {
+    const spaDistribution = new AdminSpaCloudFrontDistribution(scope, {
       domain: props.domain,
       bucket: spaBucket.bucket,
       certificate: props.certificate,
@@ -31,23 +30,19 @@ export class AdminResource {
 
     addAdminSpaBucketDeployment(scope, {
       bucket: spaBucket.bucket,
-      distribution: this.spaDistribution.distribution,
+      distribution: spaDistribution.distribution,
       sourceDirectory: props.appSourceDirectory,
     });
 
     createAdminDNSRecords(scope, {
       domain: props.domain,
       zone: props.zone,
-      distribution: this.spaDistribution.distribution,
+      distribution: spaDistribution.distribution,
     });
 
-    this.adminCognito = new AdminCognito(scope);
-    props.webPageTable.grantReadWriteData(
-      this.adminCognito.getAuthenticatedGrantee()
-    );
-  }
-
-  getAuthenticatedGrantee() {
-    return this.adminCognito.getAuthenticatedGrantee();
+    const adminCognito = new AdminCognito(scope);
+    const authenticatedGrantee = adminCognito.getAuthenticatedGrantee();
+    props.webFileBucket.grantReadWrite(authenticatedGrantee);
+    props.webPageTable.grantReadWriteData(authenticatedGrantee);
   }
 }

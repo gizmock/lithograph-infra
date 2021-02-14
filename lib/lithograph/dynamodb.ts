@@ -1,7 +1,7 @@
 import * as dynamodb from "@aws-cdk/aws-dynamodb";
 import * as cdk from "@aws-cdk/core";
 
-export class DynamoDBWebPage {
+export class WebPageTable {
   readonly table: dynamodb.ITable;
 
   constructor(scope: cdk.Stack) {
