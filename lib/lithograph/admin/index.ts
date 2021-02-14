@@ -1,5 +1,6 @@
 import * as certificatemanager from "@aws-cdk/aws-certificatemanager";
 import * as cloudfront from "@aws-cdk/aws-cloudfront";
+import * as dynamodb from "@aws-cdk/aws-dynamodb";
 import * as s3 from "@aws-cdk/aws-s3";
 import * as cdk from "@aws-cdk/core";
 import { AdminDistribution, AdminOriginAccessIdentity } from "./cloudfront";
@@ -10,6 +11,7 @@ type Props = {
   readonly domain: string;
   readonly appSourceDirectory: string;
   readonly certificate: certificatemanager.ICertificate;
+  readonly webPageTable: dynamodb.ITable;
 };
 
 export class AdminResource {
@@ -26,6 +28,7 @@ export class AdminResource {
         bucket: this.bucket,
       }
     );
+
     this.distribution = new AdminDistribution(
       scope,
       "AdminCloudFrontDistribution",
@@ -36,6 +39,7 @@ export class AdminResource {
         identity: identity,
       }
     );
+
     new AdminBucketDeployment(scope, "AdminS3Deploy", {
       bucket: this.bucket,
       distribution: this.distribution,
@@ -43,6 +47,9 @@ export class AdminResource {
     });
 
     this.adminCognito = new AdminCognito(scope);
+    props.webPageTable.grantReadWriteData(
+      this.adminCognito.getAuthenticatedGrantee()
+    );
   }
 
   getAuthenticatedGrantee() {

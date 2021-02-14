@@ -1,11 +1,11 @@
 import * as apigatewayv2 from "@aws-cdk/aws-apigatewayv2";
 import * as certificatemanager from "@aws-cdk/aws-certificatemanager";
 import * as cloudfront from "@aws-cdk/aws-cloudfront";
+import * as dynamodb from "@aws-cdk/aws-dynamodb";
 import * as iam from "@aws-cdk/aws-iam";
 import * as lambda from "@aws-cdk/aws-lambda";
 import * as s3 from "@aws-cdk/aws-s3";
 import * as cdk from "@aws-cdk/core";
-import { DynamoDBWebPage } from "../dynamodb";
 import { RenderAPI } from "./api-gateway";
 import { WebDistribution, WebOriginAccessIdentity } from "./cloudfront";
 import { RenderFunction } from "./lambda";
@@ -16,7 +16,7 @@ type Props = {
   readonly certificate: certificatemanager.ICertificate;
   readonly renderAssetDirectory: string;
   readonly renderAssetHandler: string;
-  readonly dynamodbWebPage: DynamoDBWebPage;
+  readonly webPageTable: dynamodb.ITable;
 };
 
 export class ServiceResource {
@@ -52,7 +52,7 @@ export class ServiceResource {
         identity: identity,
       }
     );
-    props.dynamodbWebPage.grantReadData(this.renderFunction.grantPrincipal);
+    props.webPageTable.grantReadData(this.renderFunction.grantPrincipal);
   }
 
   addBucketAccessToRole(grantee: iam.IGrantable): void {

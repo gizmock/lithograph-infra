@@ -3,19 +3,12 @@ import * as iam from "@aws-cdk/aws-iam";
 import * as cdk from "@aws-cdk/core";
 
 export class DynamoDBWebPage {
-  private readonly table: dynamodb.Table;
+  readonly table: dynamodb.ITable;
 
   constructor(scope: cdk.Stack) {
-    this.table = new Table(scope, "WebPageTable");
-    addGSICrossSearch(this.table);
-  }
-
-  grantReadData(grantee: iam.IGrantable) {
-    this.table.grantReadData(grantee);
-  }
-
-  grantReadWriteData(grantee: iam.IGrantable) {
-    this.table.grantReadWriteData(grantee);
+    const table = new Table(scope, "WebPageTable");
+    addGSICrossSearch(table);
+    this.table = table;
   }
 }
 

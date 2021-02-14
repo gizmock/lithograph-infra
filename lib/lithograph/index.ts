@@ -39,9 +39,8 @@ export class Lithograph {
       domain: adminDomain,
       certificate: certificates.adminCertificate,
       appSourceDirectory: props.adminAppSourceDirectory,
+      webPageTable: dynamodbWebPage.table,
     });
-    const adminGrantee = adminResource.getAuthenticatedGrantee();
-    dynamodbWebPage.grantReadWriteData(adminGrantee);
 
     // service
     const serviceResource = new web.ServiceResource(scope, {
@@ -49,12 +48,14 @@ export class Lithograph {
       certificate: certificates.webCertificate,
       renderAssetDirectory: props.webRenderAssetDirectory,
       renderAssetHandler: props.webRenderAssetHandler,
-      dynamodbWebPage: dynamodbWebPage,
+      webPageTable: dynamodbWebPage.table,
     });
     networkStacks.createDNSRecords(scope, {
       adminDistribution: adminResource.distribution,
       webDistrribution: serviceResource.distribution,
     });
-    serviceResource.addBucketAccessToRole(adminGrantee);
+    serviceResource.addBucketAccessToRole(
+      adminResource.getAuthenticatedGrantee()
+    );
   }
 }
