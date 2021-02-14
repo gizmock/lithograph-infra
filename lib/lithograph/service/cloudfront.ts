@@ -10,7 +10,7 @@ const DEFAULT_ROOT_OBJECT = "";
 const PUBLIC_FILE_ASSET_PATH = "public/*";
 
 type WebOriginAccessIdentityProps = {
-  readonly bucket: s3.IBucket;
+  bucket: s3.IBucket;
 };
 
 export class WebOriginAccessIdentity extends cloudfront.OriginAccessIdentity {
@@ -31,11 +31,12 @@ export class WebOriginAccessIdentity extends cloudfront.OriginAccessIdentity {
   }
 }
 
-type WebDistributionProps = WebOriginAccessIdentityProps & {
-  readonly domain: string;
-  readonly certificate: certificatemanager.ICertificate;
-  readonly renderAPI: apigatewayv2.IHttpApi;
-  readonly identity: cloudfront.OriginAccessIdentity;
+type WebDistributionProps = {
+  bucket: s3.IBucket;
+  domain: string;
+  certificate: certificatemanager.ICertificate;
+  renderAPI: apigatewayv2.IHttpApi;
+  identity: cloudfront.OriginAccessIdentity;
 };
 
 export class WebDistribution extends cloudfront.CloudFrontWebDistribution {
@@ -43,6 +44,7 @@ export class WebDistribution extends cloudfront.CloudFrontWebDistribution {
     super(scope, id, {
       defaultRootObject: DEFAULT_ROOT_OBJECT,
       originConfigs: [
+        // web file
         {
           s3OriginSource: {
             s3BucketSource: props.bucket,
@@ -55,6 +57,7 @@ export class WebDistribution extends cloudfront.CloudFrontWebDistribution {
             },
           ],
         },
+        // render API
         {
           customOriginSource: {
             domainName: `${props.renderAPI.httpApiId}.execute-api.${scope.region}.${scope.urlSuffix}`,

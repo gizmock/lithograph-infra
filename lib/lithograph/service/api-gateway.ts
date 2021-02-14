@@ -1,20 +1,26 @@
-import * as cdk from "@aws-cdk/core";
-import * as lambda from "@aws-cdk/aws-lambda";
 import * as apigatewayv2 from "@aws-cdk/aws-apigatewayv2";
 import * as apigatewayv2Integrations from "@aws-cdk/aws-apigatewayv2-integrations";
-
-export class ServiceRenderAPIGateway {}
+import * as lambda from "@aws-cdk/aws-lambda";
+import * as cdk from "@aws-cdk/core";
 
 type Props = {
-  handler: lambda.Function;
+  renderFunction: lambda.IFunction;
 };
 
+export class ServiceAPIGateways {
+  readonly render: apigatewayv2.IHttpApi;
+
+  constructor(scope: cdk.Construct, props: Props) {
+    this.render = new RenderAPI(scope, "WebRenderAPI", props.renderFunction);
+  }
+}
+
 export class RenderAPI extends apigatewayv2.HttpApi {
-  constructor(scope: cdk.Construct, id: string, props: Props) {
+  constructor(scope: cdk.Construct, id: string, handler: lambda.IFunction) {
     super(scope, id, {});
 
     const integration = new apigatewayv2Integrations.LambdaProxyIntegration({
-      handler: props.handler,
+      handler: handler,
     });
 
     this.addRoutes({

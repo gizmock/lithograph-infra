@@ -1,13 +1,29 @@
-import * as cdk from "@aws-cdk/core";
 import * as lambda from "@aws-cdk/aws-lambda";
+import * as cdk from "@aws-cdk/core";
 
-type Props = {
-  readonly assetDirectory: string;
-  readonly assetHandler: string;
+type RenderProps = {
+  assetDirectory: string;
+  assetHandler: string;
 };
 
-export class RenderFunction extends lambda.Function {
-  constructor(scope: cdk.Construct, id: string, props: Props) {
+type Props = {
+  render: RenderProps;
+};
+
+export class ServiceLambdaFunctions {
+  readonly render: lambda.IFunction;
+
+  constructor(scope: cdk.Construct, props: Props) {
+    this.render = new RenderFunction(
+      scope,
+      "WebRenderLambdaFunction",
+      props.render
+    );
+  }
+}
+
+class RenderFunction extends lambda.Function {
+  constructor(scope: cdk.Construct, id: string, props: RenderProps) {
     super(scope, id, {
       runtime: lambda.Runtime.GO_1_X,
       handler: props.assetHandler,

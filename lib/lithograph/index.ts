@@ -17,7 +17,7 @@ type Props = {
 
 export class Lithograph {
   constructor(scope: cdk.Stack, props: Props) {
-    // network
+    // DNS
     const adminDomain = props.adminSubDomainName + "." + props.domain;
     const hostedZone = new HostedZone(scope, props.domain);
     const certificates = new Certificates({
@@ -26,11 +26,9 @@ export class Lithograph {
       adminDomain: adminDomain,
       zone: hostedZone.zone,
     });
-
-    // S3
+    // Storage
     const webFileBucket = new WebFileBucket(scope);
-
-    // DynamoDB
+    // Database
     const webPageTable = new WebPageTable(scope);
 
     // admin
@@ -47,10 +45,10 @@ export class Lithograph {
     const serviceResource = new web.ServiceResource(scope, {
       domain: props.domain,
       certificate: certificates.webCertificate,
-      renderAssetDirectory: props.webRenderAssetDirectory,
-      renderAssetHandler: props.webRenderAssetHandler,
       webFileBucket: webFileBucket.bucket,
       webPageTable: webPageTable.table,
+      renderAssetDirectory: props.webRenderAssetDirectory,
+      renderAssetHandler: props.webRenderAssetHandler,
     });
 
     // TODO delete this
