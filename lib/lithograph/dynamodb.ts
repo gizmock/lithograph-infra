@@ -7,6 +7,7 @@ export class WebPageTable {
   constructor(scope: cdk.Stack) {
     const table = new Table(scope, "WebPageTable");
     addGSICrossSearch(table);
+    addGSITitleSearch(table);
     this.table = table;
   }
 }
@@ -36,6 +37,22 @@ function addGSICrossSearch(table: dynamodb.Table) {
       type: dynamodb.AttributeType.STRING,
     },
     nonKeyAttributes: ["id", "title", "published"],
+    projectionType: dynamodb.ProjectionType.INCLUDE,
+  });
+}
+
+function addGSITitleSearch(table: dynamodb.Table) {
+  table.addGlobalSecondaryIndex({
+    indexName: "TitleSearchGSI",
+    partitionKey: {
+      name: "titleInitial",
+      type: dynamodb.AttributeType.STRING,
+    },
+    sortKey: {
+      name: "title",
+      type: dynamodb.AttributeType.STRING,
+    },
+    nonKeyAttributes: ["id", "published"],
     projectionType: dynamodb.ProjectionType.INCLUDE,
   });
 }
